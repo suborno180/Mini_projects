@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Crop Image Before Uploading using Cropper Js?</title>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <h5>Upload Images</h5>
+        <form method="post" id="imageForm" enctype="multipart/form-data">
+            <input type="file" name="image" class="image" accept="image/*">
+            <!-- Hidden input field to store the cropped image data -->
+            <input type="hidden" name="cropped_image" id="croppedImage">
+        </form>
+        <div class="imgPriviewBox" style="display: none;"> <!-- Initially hide the preview div -->
+            <div>
+                <!-- Initially, show a placeholder image -->
+                <img src="placeholder.png" width="500" id="UploadedImage">
+                <button id="cropImageBtn">Crop Image</button>
+                <!-- Add an additional submit button -->
+                <button id="submitFormBtn">Submit Form</button>
+            </div>
+            <img src="" id="output">
+        </div>
+        <div>
+            <label for="zoomRange">Zoom:</label>
+            <input type="range" id="zoomRange" min="0.1" max="3" step="0.01" value="1">
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script>
+        const UploadedImage = document.getElementById("UploadedImage");
+        const previewDiv = document.querySelector('.imgPriviewBox');
+        const zoomRange = document.getElementById("zoomRange");
+
+        let cropper;
+
+        // Handle image input change
+        document.querySelector('.image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                UploadedImage.src = event.target.result;
+                cropper = new Cropper(UploadedImage, {
+                    aspectRatio: 10/7, // Set your desired aspect ratio here
+                    viewMode: 0,
+                    zoomOnWheel: false, // Disable zoom with mouse wheel
+                });
+                previewDiv.style.display = 'block'; // Show the preview div
+            };
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById("cropImageBtn").addEventListener("click", function() {
+            const croppedImage = cropper.getCroppedCanvas().toDataURL("image/png");
+            document.getElementById('output').src = croppedImage;
+
+            // Update the value of the hidden input field with the cropped image data
+            document.getElementById('croppedImage').value = croppedImage;
+        });
+
+        // Add an event listener to the new submit button
+        document.getElementById("submitFormBtn").addEventListener("click", function() {
+            // Submit the form
+            document.getElementById('imageForm').submit();
+        });
+
+        // Handle zoom range input
+        zoomRange.addEventListener("input", function() {
+            const zoomValue = parseFloat(zoomRange.value);
+            cropper.zoomTo(zoomValue);
+        });
+    </script>
+</body>
+</html>
