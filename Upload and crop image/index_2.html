@@ -21,18 +21,23 @@
         margin: 10px;
         border: 1px solid red;
     }
+
+    #croppedImage,#UploadedImage {
+        margin: 15px 0;
+    }
 </style>
 
 <body>
     <div class="container">
         <h5>Upload Images</h5>
+        <img id="croppedImage" style="display: none;" src="" alt="cropped image"> <!-- Cropped image preview -->
         <form method="post">
             <input type="file" id="UploadedImage" name="image" class="image">
+            <div id="cropped-image-form" style="display: none;" ">
+                <input type="file" id="cropped-image-inpput" name="cropped-image" class="image">
+            </div>
         </form>
-        <form method="post" id="cropped-image-form" style="display: none;">
-            <input type="file" id="cropped-image-inpput" name="cropped-image" class="image">
-        </form>
-        <img id="croppedImage" style="display: none;" src="" alt="cropped image"> <!-- Cropped image preview -->
+
         <button id="downloadButton" style="display: none;">Download Cropped Image</button>
         <button id="logFileInfo" style="display: none;">Log Cropped Image Info</button>
     </div>
@@ -100,7 +105,7 @@
         bs_modal
             .on("shown.bs.modal", function () {
                 cropper = new Cropper(image, {
-                    aspectRatio: 1,
+                    aspectRatio: 3/10,
                     viewMode: 3,
                     preview: ".preview",
                 });
