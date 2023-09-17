@@ -13,9 +13,9 @@
     <div class="container">
         <h5>Upload Images</h5>
         <form method="post" id="imageForm" enctype="multipart/form-data">
-            <input type="file" name="image" class="image" accept="image/*">
+            <input type="file"  name="image" class="image" accept="image/*">
             <!-- Hidden input field to store the cropped image data -->
-            <input type="hidden" name="cropped_image" id="croppedImage">
+            <input type="file" name="cropped_image" id="croppedImage">
         </form>
         <div class="imgPriviewBox" style="display: none;"> <!-- Initially hide the preview div -->
             <div>
@@ -25,8 +25,8 @@
                 <!-- Add an additional submit button -->
                 <button id="submitFormBtn">Submit Form</button>
             </div>
-            <img src="" id="output">
         </div>
+        <img src="" id="output">
         <div>
             <label for="zoomRange">Zoom:</label>
             <input type="range" id="zoomRange" min="0.1" max="3" step="0.01" value="1">
@@ -39,6 +39,7 @@
         const UploadedImage = document.getElementById("UploadedImage");
         const previewDiv = document.querySelector('.imgPriviewBox');
         const zoomRange = document.getElementById("zoomRange");
+        const croppedImageField = document.getElementById("croppedImage");
 
         let cropper;
 
@@ -63,11 +64,16 @@
         });
 
         document.getElementById("cropImageBtn").addEventListener("click", function() {
-            const croppedImage = cropper.getCroppedCanvas().toDataURL("image/png");
-            document.getElementById('output').src = croppedImage;
-
+            const croppedImageDataUrl = cropper.getCroppedCanvas().toDataURL("image/png");
+            document.getElementById('output').src = croppedImageDataUrl;
+            document.getElementById('croppedImage').value = croppedImageDataUrl;
+            
             // Update the value of the hidden input field with the cropped image data
-            document.getElementById('croppedImage').value = croppedImage;
+            croppedImageField.value = croppedImageDataUrl;
+
+            // Hide the image editing options
+            cropper.destroy();
+            previewDiv.style.display = 'none';
         });
 
         // Add an event listener to the new submit button
