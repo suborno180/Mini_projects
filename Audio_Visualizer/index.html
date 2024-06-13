@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Player with Audio and Text-to-Speech</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    /* Optional custom CSS can be added here */
+    canvas {
+      width: 100%;
+      height: 100px; /* Adjust height as needed */
+      background-color: #f0f0f0;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-200 flex justify-center items-center h-screen">
+  <div class="max-w-md p-8 bg-white rounded-lg shadow-lg">
+    <h1 class="text-xl font-bold mb-4">Music Player & Text-to-Speech</h1>
+
+    <!-- Text-to-Speech Section -->
+    <div class="mb-4">
+      <textarea id="text-input" placeholder="Enter text to speak"
+        class="w-full px-3 py-2 placeholder-gray-400 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      <button id="speak-button"
+        class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Speak</button>
+    </div>
+
+    <!-- Music Player Section -->
+    <div id="playlist" class="mb-4">
+      <div class="flex items-center justify-between py-2 border-b">
+        <button class="play-button bg-blue-500 text-white px-4 py-2 rounded-lg mr-4 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Play Song 1</button>
+        <audio class="audio-element" src="audio/Oviman - lyrics  অভমন  Tumi Bujhoni Ami Bolini  Tanveer Evan  Piran Khan  Bangla Song 2021.mp3"></audio>
+      </div>
+      <div class="flex items-center justify-between py-2 border-b">
+        <button class="play-button bg-blue-500 text-white px-4 py-2 rounded-lg mr-4 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Play Song 2</button>
+        <audio class="audio-element" src="audio/song2.mp3"></audio>
+      </div>
+      <!-- Add more songs as needed -->
+    </div>
+
+    <!-- Progress Bar and Waveform -->
+    <div class="mt-4">
+      <div id="progress-bar-container" class="relative w-full h-4 bg-gray-300 rounded-lg overflow-hidden">
+        <div id="progress-bar" class="h-full bg-blue-500"></div>
+      </div>
+      <canvas id="waveform" class="mt-4"></canvas>
+    </div>
+
+  </div>
+
+  <script>
+    // JavaScript code goes here
+    const sounds = {
+      "hello": "audio/hello.mp3",
+      "world": "audio/world.mp3",
+      // Add more mappings as needed
+    };
+
+   // JavaScript code goes here
+const audioElements = document.querySelectorAll('.audio-element');
+const playButtons = document.querySelectorAll('.play-button');
+const canvas = document.getElementById('waveform');
+const ctx = canvas.getContext('2d');
+
+const speakButton = document.getElementById('speak-button');
+const textInput = document.getElementById('text-input');
+const progressBar = document.getElementById('progress-bar');
+
+speakButton.addEventListener('click', () => {
+  const text = textInput.value.trim();
+  if (text === '') {
+    return; // Handle empty text case
+  }
+
+  speakText(text);
+});
+
+playButtons.forEach((button, index) => {
+  button.addEventListener('click', () => {
+    pauseAll(); // Pause all other songs before playing the selected one
+    audioElements[index].play();
+    displayWaveform(audioElements[index]);
+  });
+});
+
+function pauseAll() {
+  audioElements.forEach(audio => {
+    audio.pause();
+  });
+}
+
+function displayWaveform(audioElement) {
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const analyser = audioCtx.createAnalyser();
+  const source = audioCtx.createMediaElementSource(audioElement);
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
+
+  analyser.fftSize = 256;
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const draw = () => {
+    const WIDTH = canvas.width;
+    const HEIGHT = canvas.height;
+
+    analyser.getByteTimeDomainData(dataArray);
+
+    ctx.fillStyle = 'rgb(0, 0, 0)';
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgb(0, 255, 0)';
+    ctx.beginPath();
+
+    const sliceWidth = WIDTH * 1.0 / bufferLength;
+    let x = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+      const v = dataArray[i] / 128.0;
+      const y = v * HEIGHT / 2;
+
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+
+      x += sliceWidth;
+    }
+
+    ctx.lineTo(canvas.width, canvas.height / 2);
+    ctx.stroke();
+
+    requestAnimationFrame(draw);
+  };
+
+  draw();
+}
+
+function speakText(text) {
+  const synth = window.speechSynthesis;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1; // Adjust speed of speech
+  synth.speak(utterance);
+
+  utterance.onstart = () => {
+    // Update progress bar during speech
+    const duration = utterance.text.split(' ').length * 0.5; // Assuming 0.5 seconds per word
+    updateProgressBar(duration);
+  };
+
+  utterance.onend = () => {
+    // Speech has finished, clear progress bar
+    progressBar.style.width = '0%';
+  };
+
+  utterance.onerror = (err) => {
+    console.error('Speech synthesis error:', err);
+    // Handle error or provide feedback to the user
+  };
+}
+
+function updateProgressBar(duration) {
+  let currentTime = 0;
+  const interval = 50; // Adjust interval as needed for smoother animation
+  let progressInterval = null;
+
+  const update = () => {
+    currentTime += interval / 1000;
+    const progress = (currentTime / duration) * 100;
+    progressBar.style.width = `${progress}%`;
+
+    if (currentTime >= duration) {
+      clearInterval(progressInterval);
+    }
+  };
+
+  clearInterval(progressInterval);
+  progressInterval = setInterval(update, interval);
+}
+
+
+    function displayWaveform(audioElement) {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const analyser = audioCtx.createAnalyser();
+      const source = audioCtx.createMediaElementSource(audioElement);
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+
+      analyser.fftSize = 256;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const draw = () => {
+        const WIDTH = canvas.width;
+        const HEIGHT = canvas.height;
+
+        analyser.getByteTimeDomainData(dataArray);
+
+        ctx.fillStyle = 'rgb(0, 0, 0)';
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgb(0, 255, 0)';
+        ctx.beginPath();
+
+        const sliceWidth = WIDTH * 1.0 / bufferLength;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 128.0;
+          const y = v * HEIGHT / 2;
+
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+
+          x += sliceWidth;
+        }
+
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
+
+        requestAnimationFrame(draw);
+      };
+
+      draw();
+    }
+  </script>
+</body>
+
+</html>
