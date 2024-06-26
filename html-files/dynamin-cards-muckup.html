@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    main {
+      background: #cec7bf;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+    .base {
+      background: #e1ddd4;
+      min-height: 100vh;
+      min-width: 100vw;
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: rotate(45deg) translate(0px, 0px) skew(0deg, 1deg);
+      box-shadow: -23px 41px 67px 9px rgba(74, 68, 68, 0.75);
+      -webkit-box-shadow: -23px 41px 67px 9px rgba(74, 68, 68, 0.75);
+      -moz-box-shadow: -23px 41px 67px 9px rgba(74, 68, 68, 0.75);
+      filter: drop-shadow(2px 40px 17px rgba(74, 68, 68, 0.75));
+    }
+    .base::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 20px;
+      background: #8b8a8a;
+      transform: translateX(10px) translateY(20px) skew(45deg, 0deg);
+      z-index: -1;
+    }
+    .bard{
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-content: flex-end;
+        flex-direction: column;
+        justify-content: flex-end;
+    }
+    .bard .cardWrapper{
+        width: 100vw;
+        min-height: 500px;
+        display: flex;
+        align-items: center;
+        padding: 0px 350px;
+        gap: 25px;
+        transform: translateY(200px);
+    }
+     .bard .cardWrapper .card{
+        width: 298px;
+        height: 450px;
+        display: grid;
+        place-content: center;
+     }
+    .bard .cardWrapper .card .logo-part{
+        transform: rotate(270deg);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+     }
+     .bard .cardWrapper .card .logo-part img{
+        width: 100px;
+     }
+     .bard .cardWrapper .card .logo-part h2{
+        font-size: 30px;
+     }
+     .bard .cardWrapper .card-light{
+        background: white;
+     }
+     .bard .cardWrapper .card-dark{
+        background: rgb(6, 2, 54);
+     }
+
+  </style>
+  <body>
+    <main>
+      <div class="base">
+        <div class="bard">
+            <div class="cardWrapper">
+                <div class="card card-light">
+                    <div class="logo-part">
+                        <img src="https://static.vecteezy.com/system/resources/previews/024/553/534/non_2x/lion-head-logo-mascot-wildlife-animal-illustration-generative-ai-png.png" alt="logo"/>
+                    </div>
+                </div>
+                <div class="card card-dark">
+                    <div class="logo-part">
+                        <img src="https://static.vecteezy.com/system/resources/previews/024/553/534/non_2x/lion-head-logo-mascot-wildlife-animal-illustration-generative-ai-png.png" alt="logo"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </main>
+
+</body>
+</html>
